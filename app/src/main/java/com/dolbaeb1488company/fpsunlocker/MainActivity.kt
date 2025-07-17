@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<ImageButton>(R.id.github_button).setOnClickListener {
             startActivity(Intent(Intent.ACTION_VIEW,
-                "https://github.com/your-username/your-repo".toUri()))
+                "https://github.com/ewfawfasdf/VivoIQOO144FPSUnlocker/".toUri()))
         }
     }
 }
