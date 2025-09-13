@@ -1,4 +1,4 @@
-package com.dolbaeb1488company.fpsunlocker
+package com.dezory.vivofpsunlocker
 
 import org.junit.Test
 

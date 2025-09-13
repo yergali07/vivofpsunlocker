@@ -1,0 +1,48 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Monoline "144Hz" for themed icons (black stroke) -->
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:scaleX="0.78"
+        android:scaleY="0.78">
+        <path
+            android:pathData="M24,34 L24,80"
+            android:fillColor="#00000000"
+            android:strokeColor="#000000"
+            android:strokeWidth="10"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M44,34 L44,56 M44,56 L64,56 M64,34 L64,80"
+            android:fillColor="#00000000"
+            android:strokeColor="#000000"
+            android:strokeWidth="10"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M76,34 L76,56 M76,56 L96,56 M96,34 L96,80"
+            android:fillColor="#00000000"
+            android:strokeColor="#000000"
+            android:strokeWidth="10"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M68,88 L68,102 M68,95 L80,95 M80,88 L80,102"
+            android:fillColor="#00000000"
+            android:strokeColor="#000000"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M86,88 L100,88 M100,88 L86,102 M86,102 L100,102"
+            android:fillColor="#00000000"
+            android:strokeColor="#000000"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+    </group>
+</vector>

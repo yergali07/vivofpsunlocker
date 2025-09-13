@@ -1,4 +1,4 @@
-package com.dolbaeb1488company.fpsunlocker
+package com.dezory.vivofpsunlocker
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.dolbaeb1488company.fpsunlocker", appContext.packageName)
+        assertEquals("com.dezory.vivofpsunlocker", appContext.packageName)
     }
 }

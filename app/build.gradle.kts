@@ -1,14 +1,16 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    // Enable Compose plugin for Kotlin 2.x toolchain
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
-    namespace = "com.dolbaeb1488company.fpsunlocker"
+    namespace = "com.dezory.vivofpsunlocker"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.dolbaeb1488company.fpsunlocker"
+        applicationId = "com.dezory.vivofpsunlocker"
         minSdk = 21
         //noinspection ExpiredTargetSdkVersion
         targetSdk = 22
@@ -36,19 +38,32 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
-        compose = false
+        compose = true
     }
+    // Compose compiler version is managed by the Kotlin Compose plugin
 }
 
 dependencies {
-    
+    // Core
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
-    implementation(libs.androidx.ui.graphics.android)
+
+    // Jetpack Compose (Material 3)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.foundation.android)
-    implementation(libs.androidx.material3.android)
+    // Material icons for bottom navigation
+    implementation("androidx.compose.material:material-icons-extended")
+    // Optional: previews/testing
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

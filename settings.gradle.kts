@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Vivo-IQOO 144 FPS Unlocker"
+rootProject.name = "FPS Unlocker"
 include(":app")

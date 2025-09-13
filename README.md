@@ -1,45 +1,80 @@
-# Vivo iQOO 144 FPS Unlocker
+# Vivo/iQOO 144 FPS Unlocker
 
-Этот инструмент позволяет разблокировать частоту обновления экрана до 144 Гц для любых приложений и игр на устройствах Vivo iQOO. Он изменяет скрытую системную настройку, которая по умолчанию ограничивает частоту обновления экрана только для определенных приложений.
+Small Android app that unlocks 144 Hz globally on certain Vivo/iQOO (OriginOS) devices by writing a vendor system setting.
 
-## Как это работает?
-Приложение модифицирует системную настройку с ключом `gamecube_frame_interpolation_for_sr`. По умолчанию эта настройка ограничивает FPS. Инструмент меняет её значение на `1:1:1:72:144`, что принудительно устанавливает частоту обновления экрана на 144 Гц для всех поддерживающих приложений.
+Русская версия ниже.
 
-**Важно**: Этот инструмент не гарантирует работу всех игр на 144 FPS. Он снимает программное ограничение на уровне ОС, но фактическая производительность зависит от возможностей вашего устройства.
+## How it works
+- Writes the system key `gamecube_frame_interpolation_for_sr` to `1:1::72:144` when ON, and to `0:-1:0:0:0` when OFF.
+- A small foreground service re-applies the value periodically to prevent the system from reverting it.
 
-## Установка и использование
+Important: This only removes a software cap. Actual 144 Hz depends on your device, game/app, and thermal/perf limits.
 
-### Для обычных пользователей
-**ВНИМАНИЕ**: Приложению требуются специальные разрешения
+## Install & use
+- Download APK from the repo releases: https://github.com/yergali07/vivofpsunlocker
+- Open the app → Home tab → toggle ON/OFF.
+- If prompted, allow "Modify system settings" for the app (needed to write `Settings.System`).
 
-1. **Скачайте и установите** приложение [app-release.apk](https://github.com/ewfawfasdf/VivoIQOO144FPSUnlocker/releases/download/release/app-release.apk) на ваш Vivo iQOO
-2. **Запустите приложение** на телефоне и активируйте переключатель
+## Permissions
+- `android.permission.WRITE_SETTINGS` — required to change `Settings.System` values.
 
-### Для разработчиков
+## Compatibility
+- Designed for Vivo/iQOO devices on OriginOS where the key exists and is honored by the firmware.
+- May not work on other vendors/ROMs or after firmware updates.
 
-#### Требования
-- Android Studio
-- Java SDK
-- Устройство Vivo iQOO с OriginOS
-- Включенная USB-отладка
+## Development
+```bash
+git clone https://github.com/yergali07/vivofpsunlocker
+./gradlew :app:assembleDebug
+```
+The app uses Jetpack Compose + Material 3 with dynamic color and a bottom navigation (Home, About).
 
-#### Сборка и запуск
-1. Клонируйте репозиторий:
-   ```bash
-   git clone https://github.com/ewfawfasdf/VivoIQOO144FPSUnlocker/
-   ```
-2. Откройте проект в Android Studio
-3. Выдайте разрешения через ADB (как указано выше)
-4. Соберите APK и установите на устройство
+---
 
+## Русская версия
 
-## Разрешения
-- `android.permission.WRITE_SETTINGS` - изменение системных настроек
+Небольшое Android‑приложение, которое разблокирует 144 Гц глобально на некоторых устройствах Vivo/iQOO (OriginOS) путём изменения вендорской системной настройки.
 
-## Совместимость
-Инструмент разработан специально для устройств **OriginOS**. Системный ключ `gamecube_frame_interpolation_for_sr` может отсутствовать на:
-- Устройствах других производителей
-- Неподдерживаемых версиях прошивки
+### Как это работает
+- При включении пишет в ключ `gamecube_frame_interpolation_for_sr` значение `1:1::72:144`, при выключении — `0:-1:0:0:0`.
+- Фоновая служба периодически обновляет значение, чтобы система его не сбрасывала.
 
-## Лицензия
-Этот проект распространяется под лицензией ВЛАДИМИРА ПУТНИА💤💤💤💤💤💤.
+Важно: Это снимает только программное ограничение. Реальные 144 Гц зависят от устройства, приложений и тепловых/производительных лимитов.
+
+### Установка и использование
+1. Скачайте APK со страницы релизов: https://github.com/yergali07/vivofpsunlocker
+2. Откройте приложение → вкладка Home → включите переключатель.
+3. Если появится запрос, предоставьте приложению доступ "Изменение системных настроек".
+
+### Разрешения
+- `android.permission.WRITE_SETTINGS` — изменение значений в `Settings.System`.
+
+### Совместимость
+- Приложение рассчитано на устройства Vivo/iQOO c OriginOS, где присутствует и обрабатывается указанный ключ.
+- На других устройствах/прошивках может не работать.
+
+---
+
+## License
+
+MIT License
+
+Copyright (c) 2025 yergali07 and contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

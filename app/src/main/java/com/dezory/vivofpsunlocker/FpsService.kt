@@ -1,4 +1,4 @@
-package com.dolbaeb1488company.fpsunlocker
+package com.dezory.vivofpsunlocker
 
 import android.app.Notification
 import android.app.Service
@@ -39,8 +39,12 @@ class FpsService : Service() {
             override fun run() {
                 if (prefs.getBoolean("fps_enabled", false)) {
                     try {
-                        Settings.System.putString(contentResolver, "gamecube_frame_interpolation_for_sr", "1:1::72:144")
-                        Log.d("FPSUnlocker", "Refreshed setting to '1:1::72:144'")
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.System.canWrite(this@FpsService)) {
+                            Settings.System.putString(contentResolver, "gamecube_frame_interpolation_for_sr", "1:1::72:144")
+                            Log.d("FPSUnlocker", "Refreshed setting to '1:1::72:144'")
+                        } else {
+                            Log.w("FPSUnlocker", "Missing WRITE_SETTINGS permission; skipping refresh")
+                        }
                     } catch (e: SecurityException) {
                         Log.e("FPSUnlocker", "SecurityException: ${e.message}", e)
                     } catch (e: Exception) {
