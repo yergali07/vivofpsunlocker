@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -55,11 +56,50 @@ private fun FpsUnlockerApp() {
         var enabled by remember { mutableStateOf(false) }
         var selectedTab by remember { mutableStateOf(0) } // 0 = Home, 1 = About
         var showWriteSettingsDialog by remember { mutableStateOf(false) }
+        var currentFps by remember { mutableStateOf<Float?>(null) }
+        var overlayEnabled by remember { mutableStateOf(false) }
 
         LaunchedEffect(Unit) {
             val current = Settings.System.getString(context.contentResolver, "gamecube_frame_interpolation_for_sr")
             enabled = current == "1:1::72:144"
             Log.d("FPSUnlocker", "Initial: 'gamecube_frame_interpolation_for_sr' = '$current'")
+            overlayEnabled = context.getSharedPreferences("FpsPrefs", android.content.Context.MODE_PRIVATE)
+                .getBoolean("overlay_enabled", false)
+        }
+
+        // Listen for state changes from QS tile or other sources
+        DisposableEffect(Unit) {
+            val receiver = object : android.content.BroadcastReceiver() {
+                override fun onReceive(c: android.content.Context?, intent: Intent?) {
+                    if (intent?.action == FpsManager.ACTION_FPS_CHANGED) {
+                        val newEnabled = intent.getBooleanExtra(FpsManager.EXTRA_ENABLED, FpsManager.isEnabled(context))
+                        enabled = newEnabled
+                    } else if (intent?.action == OverlayManager.ACTION_OVERLAY_CHANGED) {
+                        val newOverlay = intent.getBooleanExtra(OverlayManager.EXTRA_ENABLED, OverlayManager.isEnabled(context))
+                        overlayEnabled = newOverlay
+                    }
+                }
+            }
+            val filter = android.content.IntentFilter().apply {
+                addAction(FpsManager.ACTION_FPS_CHANGED)
+                addAction(OverlayManager.ACTION_OVERLAY_CHANGED)
+            }
+            context.registerReceiver(receiver, filter)
+            onDispose { context.unregisterReceiver(receiver) }
+        }
+
+        // Simple in-app FPS monitor (for this Activity only)
+        LaunchedEffect(Unit) {
+            while (true) {
+                val windowNs = 1_000_000_000L // 1s window
+                val start = System.nanoTime()
+                var frames = 0
+                while (System.nanoTime() - start < windowNs) {
+                    withFrameNanos { _ -> frames++ }
+                }
+                val elapsed = (System.nanoTime() - start).coerceAtLeast(1L)
+                currentFps = frames.toFloat() / (elapsed / 1_000_000_000f)
+            }
         }
 
         Scaffold(
@@ -102,37 +142,50 @@ private fun FpsUnlockerApp() {
                                 Switch(
                                     checked = enabled,
                                     onCheckedChange = { isChecked ->
-                                        val canWrite = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                            Settings.System.canWrite(context)
-                                        } else true
+                                        val canWrite = FpsManager.canWriteSettings(context)
                                         if (!canWrite) {
                                             showWriteSettingsDialog = true
                                             return@Switch
                                         }
-                                        try {
-                                            val value = if (isChecked) "1:1::72:144" else "0:-1:0:0:0"
-                                            Settings.System.putString(context.contentResolver, "gamecube_frame_interpolation_for_sr", value)
-                                            enabled = isChecked
-                                            Toast.makeText(context, if (isChecked) "144 FPS on!" else "144 FPS off", Toast.LENGTH_SHORT).show()
-                                            // Persist flag for the service refresher
-                                            context.getSharedPreferences("FpsPrefs", android.content.Context.MODE_PRIVATE)
-                                                .edit().putBoolean("fps_enabled", isChecked).apply()
-                                            if (isChecked) context.startService(Intent(context, FpsService::class.java))
-                                            else context.stopService(Intent(context, FpsService::class.java))
-                                        } catch (e: SecurityException) {
-                                            Log.e("FPSUnlocker", "SecurityException: ${e.message}", e)
-                                            showWriteSettingsDialog = true
-                                        } catch (e: Exception) {
-                                            Log.e("FPSUnlocker", "err: ${e.message}", e)
-                                            Toast.makeText(context, "err: ${e.message}", Toast.LENGTH_LONG).show()
-                                        }
+                                        val ok = FpsManager.setEnabled(context, isChecked)
+                                        if (ok) enabled = isChecked else Toast.makeText(context, "Failed to toggle FPS", Toast.LENGTH_SHORT).show()
                                     }
                                 )
                                 Spacer(Modifier.width(12.dp))
                                 Text("ON", color = if (enabled) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline)
                             }
                             Spacer(Modifier.height(12.dp))
-                            Text(text = if (enabled) "Current FPS: 144" else "Current FPS: 0-120", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            val fpsText = currentFps?.let { String.format("Current FPS: %.0f", it) }
+                                ?: "Current FPS: —"
+                            Text(text = fpsText, color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+                            Spacer(Modifier.height(16.dp))
+                            Divider()
+                            Spacer(Modifier.height(16.dp))
+
+                            // Overlay toggle row
+                            Text("FPS Overlay (over other apps)", style = MaterialTheme.typography.titleSmall)
+                            Spacer(Modifier.height(8.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text("OFF", color = if (!overlayEnabled) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline)
+                                Spacer(Modifier.width(12.dp))
+                                Switch(
+                                    checked = overlayEnabled,
+                                    onCheckedChange = { isChecked ->
+                                        if (isChecked && !OverlayManager.canDrawOverlays(context)) {
+                                            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.packageName))
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                            context.startActivity(intent)
+                                            Toast.makeText(context, "Grant 'Display over other apps' and toggle again", Toast.LENGTH_LONG).show()
+                                            return@Switch
+                                        }
+                                        val ok = OverlayManager.setEnabled(context, isChecked)
+                                        if (ok) overlayEnabled = isChecked else Toast.makeText(context, "Failed to toggle overlay", Toast.LENGTH_SHORT).show()
+                                    }
+                                )
+                                Spacer(Modifier.width(12.dp))
+                                Text("ON", color = if (overlayEnabled) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline)
+                            }
                         }
                     }
                     if (showWriteSettingsDialog) {
@@ -161,28 +214,44 @@ private fun FpsUnlockerApp() {
                         contentPadding = PaddingValues(top = 24.dp, bottom = 24.dp, start = 16.dp, end = 16.dp)
                     ) {
                         item {
-                            val aboutText = """
-                                |Vivo/iQOO 144 FPS Unlocker
-                                |
-                                |Unlocks 144 Hz globally on certain Vivo/iQOO (OriginOS) devices by writing the vendor system key.
-                                |
-                                |How it works
-                                |- ON writes: gamecube_frame_interpolation_for_sr = 1:1::72:144
-                                |- OFF writes: 0:-1:0:0:0
-                                |- A foreground service re-applies the value periodically.
-                                |
-                                |Notes
-                                |- Requires 'Modify system settings' permission to succeed.
-                                |- Actual 144 Hz depends on device/app performance.
-                                |
-                                |Source & releases: https://github.com/yergali07/vivofpsunlocker
-                                |""".trimMargin()
                             Text(
-                                text = aboutText,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Start
+                                text = "Vivo/iQOO 144 FPS Unlocker",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = "Unlock 144 Hz globally on supported OriginOS devices by writing the vendor system key.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+
+                            Spacer(Modifier.height(24.dp))
+                            Text("How it works", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                            Spacer(Modifier.height(8.dp))
+                            Text("• ON writes: gamecube_frame_interpolation_for_sr = 1:1::72:144", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("• OFF writes: 0:-1:0:0:0", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("• Foreground service periodically re-applies the value.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+                            Spacer(Modifier.height(16.dp))
+                            Text("Quick Settings tiles", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                            Spacer(Modifier.height(8.dp))
+                            Text("• 144 FPS tile — toggles the global 144 Hz unlock.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("• FPS Overlay tile — toggles the floating FPS bubble.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("Tip: Pull down QS → Edit → add both tiles.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+                            Spacer(Modifier.height(16.dp))
+                            Text("FPS overlay", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                            Spacer(Modifier.height(8.dp))
+                            Text("• Shows current FPS above all apps (draggable).", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("• Requires ‘Display over other apps’ permission on first use.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+                            Spacer(Modifier.height(16.dp))
+                            Text("Notes", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                            Spacer(Modifier.height(8.dp))
+                            Text("• Needs ‘Modify system settings’ to toggle 144 Hz.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("• Actual 144 Hz depends on device/app performance.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Spacer(Modifier.height(24.dp))
                         }
                         item {

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Center the whole drawing (content width ≈ 20, so shift left by 2) -->
+    <group android:translateX="-2">
+
+        <!-- 1 -->
+        <path android:fillColor="#FFFFFFFF" android:pathData="M4,5h3v14H4z"/>
+
+        <!-- first 4 -->
+        <!-- left vertical -->
+        <path android:fillColor="#FFFFFFFF" android:pathData="M9,5h3v7H9z"/>
+        <!-- cross bar (kept inside the 4 only) -->
+        <path android:fillColor="#FFFFFFFF" android:pathData="M9,10h4v3H9z"/>
+        <!-- right vertical -->
+        <path android:fillColor="#FFFFFFFF" android:pathData="M13,5h3v14h-3z"/>
+
+        <!-- second 4 -->
+        <!-- left vertical -->
+        <path android:fillColor="#FFFFFFFF" android:pathData="M17,5h3v7h-3z"/>
+        <!-- cross bar (kept inside the 4 only) -->
+        <path android:fillColor="#FFFFFFFF" android:pathData="M17,10h4v3h-4z"/>
+        <!-- right vertical -->
+        <path android:fillColor="#FFFFFFFF" android:pathData="M21,5h3v14h-3z"/>
+    </group>
+</vector>

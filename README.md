@@ -15,8 +15,18 @@ Important: This only removes a software cap. Actual 144 Hz depends on your devic
 - Open the app → Home tab → toggle ON/OFF.
 - If prompted, allow "Modify system settings" for the app (needed to write `Settings.System`).
 
+### Quick Settings tiles (Android 7.0+)
+- 144 FPS tile — toggles the global 144 Hz unlock.
+- FPS Overlay tile — toggles a small floating FPS bubble over all apps.
+- Add them via QS editor: Pull down QS → Edit → drag tiles into the active area.
+
+### FPS overlay
+- Shows current FPS system rendering above all apps, draggable.
+- Requires "Display over other apps" permission on first use.
+
 ## Permissions
 - `android.permission.WRITE_SETTINGS` — required to change `Settings.System` values.
+- `android.permission.SYSTEM_ALERT_WINDOW` — required for the floating overlay bubble.
 
 ## Compatibility
 - Designed for Vivo/iQOO devices on OriginOS where the key exists and is honored by the firmware.
@@ -46,8 +56,18 @@ The app uses Jetpack Compose + Material 3 with dynamic color and a bottom naviga
 2. Откройте приложение → вкладка Home → включите переключатель.
 3. Если появится запрос, предоставьте приложению доступ "Изменение системных настроек".
 
+#### Плитки в шторке быстрых настроек (Android 7.0+)
+- Плитка «144 FPS» — включает/выключает глобальную разблокировку 144 Гц.
+- Плитка «FPS Overlay» — включает/выключает плавающий индикатор FPS поверх всех приложений.
+- Добавление: откройте шторку QS → «Изменить» → перетащите плитки в активную область.
+
+#### Плавающий индикатор FPS
+- Показывает текущий FPS системы поверх всех приложений, можно перетаскивать.
+- При первом запуске потребуется разрешение «Отображение поверх других приложений».
+
 ### Разрешения
 - `android.permission.WRITE_SETTINGS` — изменение значений в `Settings.System`.
+- `android.permission.SYSTEM_ALERT_WINDOW` — для плавающего индикатора FPS.
 
 ### Совместимость
 - Приложение рассчитано на устройства Vivo/iQOO c OriginOS, где присутствует и обрабатывается указанный ключ.

@@ -14,6 +14,9 @@
     <!-- Разрешение для фоновой службы -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
+    <!-- Разрешение на отображение поверх других приложений (пользователь должен вручную выдать) -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
     <!-- Разрешения на доступ к файлам (актуально только до Android 12) -->
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
@@ -53,6 +56,37 @@
         </activity>
         <service
             android:name=".FpsService"
+            android:exported="false" />
+
+        <!-- Quick Settings Tile (Android 7.0+) -->
+        <service
+            android:name=".FpsTileService"
+            android:label="@string/qs_tile_label"
+            android:icon="@drawable/ic_qs_144"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:exported="true"
+            tools:targetApi="n">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <!-- QS tile for overlay toggle -->
+        <service
+            android:name=".OverlayTileService"
+            android:label="@string/qs_tile_overlay_label"
+            android:icon="@drawable/ic_qs_overlay"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:exported="true"
+            tools:targetApi="n">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <!-- FPS overlay service shown above all apps -->
+        <service
+            android:name=".FpsOverlayService"
             android:exported="false" />
 
     </application>
